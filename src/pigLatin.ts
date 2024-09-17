@@ -1,25 +1,44 @@
 export function toPigLatin(word: string): string {
-  // Validate that the input is a non-empty string
-  if (typeof word !== 'string' || !word.trim()) {
-    throw new Error('Invalid input: word cannot be empty.');
-  }
+  // Validations
+  validateInput(word);
 
-  // Normalize the input to avoid case issues
+  // Normalize the input to avoid case issues, but keep accents intact
   const normalizedWord = word.toLowerCase().trim();
-  const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
+  const isCapitalized = word[0] === word[0].toUpperCase();
+  const vowels = new Set(['a', 'e', 'i', 'o', 'u', 'á', 'é', 'í', 'ó', 'ú']);
 
   // Check if the first letter is a vowel
   if (vowels.has(normalizedWord[0])) {
-    return normalizedWord + 'way';
-  } else {
-    // Find the index of the first vowel using regular expression
-    const firstVowelMatch = normalizedWord.match(/[aeiou]/);
-    if (!firstVowelMatch) {
-      // No vowel found
-      return normalizedWord + 'ay';
-    }
-
-    const firstVowelIndex = firstVowelMatch.index!;
-    return normalizedWord.slice(firstVowelIndex) + normalizedWord.slice(0, firstVowelIndex) + 'ay';
+    const result = normalizedWord + 'way';
+    return isCapitalized ? capitalize(result) : result;
   }
+
+  // Find the index of the first vowel
+  const firstVowelIndex = findFirstVowelIndex(normalizedWord);
+  const result = normalizedWord.slice(firstVowelIndex) + normalizedWord.slice(0, firstVowelIndex) + 'ay';
+  return isCapitalized ? capitalize(result) : result;
+}
+
+// Helper function to validate input
+function validateInput(word: string): void {
+  if (typeof word !== 'string' || !word.trim()) {
+    throw new Error('Invalid input: word cannot be empty.');
+  }
+  if (!/^[a-zA-ZáéíóúÁÉÍÓÚ]+$/.test(word)) {
+    throw new Error('Invalid input: word contains non-letter characters.');
+  }
+}
+
+// Helper function to capitalize the first letter of a string
+function capitalize(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+// Helper function to find the index of the first vowel
+function findFirstVowelIndex(word: string): number {
+  const firstVowelMatch = word.match(/[aeiouáéíóú]/);
+  if (!firstVowelMatch) {
+    return word.length;
+  }
+  return firstVowelMatch.index!;
 }
